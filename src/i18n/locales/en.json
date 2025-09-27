@@ -1,0 +1,100 @@
+﻿{
+  "app": {
+    "title": "MyBudget"
+  },
+  "nav": {
+    "label": "Primary navigation",
+    "dashboard": "Dashboard",
+    "settings": "Settings"
+  },
+  "common": {
+    "cancel": "Cancel",
+    "confirm": "Confirm",
+    "dismiss": "Dismiss"
+  },
+  "toasts": {
+    "languageChanged": "Language updated",
+    "importSuccess": "Ledger imported",
+    "importFailed": "Import failed",
+    "exported": "Ledger exported",
+    "exportFailed": "Export failed",
+    "resetDone": "Workspace reset",
+    "autoSaved": "Changes saved"
+  },
+  "settings": {
+    "languageTitle": "Language",
+    "languageHint": "Switch between English and Persian.",
+    "themeTitle": "Theme",
+    "themeHint": "Follow system or lock the interface to light or dark mode.",
+    "themeSystem": "System",
+    "themeLight": "Light",
+    "themeDark": "Dark",
+    "moneyTitle": "Money settings",
+    "moneyHint": "Control currency formatting and defaults.",
+    "usdRate": "USD to IRT rate",
+    "defaultMonth": "Default month",
+    "density": "Table density",
+    "densityComfortable": "Comfortable",
+    "densityCompact": "Compact",
+    "totalsUnit": "Totals display unit",
+    "dataTitle": "Data",
+    "dataHint": "Export, import, or reset ledger data.",
+    "export": "Export JSON",
+    "import": "Import JSON",
+    "resetAll": "Reset all",
+    "resetTitle": "Reset all data?",
+    "resetDescription": "This clears settings and ledger rows back to the starter seed.",
+    "pageTitle": "Settings",
+    "pageDescription": "Tune language, theme, currency, and data preferences."
+  },
+  "dashboard": {
+    "monthGroupLabel": "Month picker",
+    "prevMonth": "Previous month",
+    "nextMonth": "Next month",
+    "monthInputLabel": "Month",
+    "addRow": "Add row"
+  },
+  "table": {
+    "title": "Title",
+    "planned": "Planned",
+    "unit": "Unit",
+    "must": "Must",
+    "comment": "Comment",
+    "paidFlag": "Paid?",
+    "paid": "Paid",
+    "pending": "Pending",
+    "kind": "Kind",
+    "actions": "Actions",
+    "duplicate": "Duplicate",
+    "delete": "Delete"
+  },
+  "placeholders": {
+    "title": "Add a title",
+    "comment": "Optional notes",
+    "paid": "Enter amount"
+  },
+  "feedback": {
+    "saving": "Saving…",
+    "saved": "Saved",
+    "noRows": "No rows for this month yet."
+  },
+  "units": {
+    "irt": "IRT",
+    "irm": "IRMT (Iran Million Toman)",
+    "usd": "USD"
+  },
+  "kinds": {
+    "expense": "Expense",
+    "income": "Income"
+  },
+  "totals": {
+    "overview": "Overview",
+    "planned": "Planned",
+    "paid": "Paid",
+    "pending": "Pending",
+    "breakdown": "Breakdown",
+    "income": "Income",
+    "expenses": "Expenses"
+  }
+}
+

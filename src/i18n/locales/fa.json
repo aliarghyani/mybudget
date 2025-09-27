@@ -1,0 +1,100 @@
+﻿{
+  "app": {
+    "title": "مای‌باجت"
+  },
+  "nav": {
+    "label": "ناوبری اصلی",
+    "dashboard": "داشبورد",
+    "settings": "تنظیمات"
+  },
+  "common": {
+    "cancel": "انصراف",
+    "confirm": "تأیید",
+    "dismiss": "بستن"
+  },
+  "toasts": {
+    "languageChanged": "زبان به‌روزرسانی شد",
+    "importSuccess": "دفتر وارد شد",
+    "importFailed": "وارد کردن ناموفق بود",
+    "exported": "دفترچه صادر شد",
+    "exportFailed": "صادر کردن ناموفق بود",
+    "resetDone": "همه چیز بازنشانی شد",
+    "autoSaved": "تغییرات ذخیره شد"
+  },
+  "settings": {
+    "languageTitle": "زبان",
+    "languageHint": "بین انگلیسی و فارسی جابجا شوید.",
+    "themeTitle": "پوسته",
+    "themeHint": "هماهنگ با سیستم یا انتخاب حالت روشن/تاریک.",
+    "themeSystem": "سیستمی",
+    "themeLight": "روشن",
+    "themeDark": "تاریک",
+    "moneyTitle": "تنظیمات مالی",
+    "moneyHint": "نمایش ارز و مقادیر پیش‌فرض را کنترل کنید.",
+    "usdRate": "نرخ دلار به تومان",
+    "defaultMonth": "ماه پیش‌فرض",
+    "density": "تراکم جدول",
+    "densityComfortable": "عادی",
+    "densityCompact": "فشرده",
+    "totalsUnit": "واحد نمایش مجموع",
+    "dataTitle": "داده‌ها",
+    "dataHint": "داده جدول را وارد، صادر یا بازنشانی کنید.",
+    "export": "خروجی JSON",
+    "import": "ورودی JSON",
+    "resetAll": "بازنشانی کامل",
+    "resetTitle": "بازنشانی همه داده‌ها؟",
+    "resetDescription": "تمام تنظیمات و سطرها به نمونه اولیه باز می‌گردند.",
+    "pageTitle": "تنظیمات",
+    "pageDescription": "زبان، پوسته، ارز و داده‌ها را مدیریت کنید."
+  },
+  "dashboard": {
+    "monthGroupLabel": "انتخاب ماه",
+    "prevMonth": "ماه قبل",
+    "nextMonth": "ماه بعد",
+    "monthInputLabel": "ماه",
+    "addRow": "افزودن سطر"
+  },
+  "table": {
+    "title": "عنوان",
+    "planned": "برنامه‌ریزی",
+    "unit": "واحد",
+    "must": "ضروری",
+    "comment": "یادداشت",
+    "paidFlag": "پرداخت شد؟",
+    "paid": "پرداخت‌شده",
+    "pending": "باقی‌مانده",
+    "kind": "نوع",
+    "actions": "عملیات",
+    "duplicate": "تکرار",
+    "delete": "حذف"
+  },
+  "placeholders": {
+    "title": "عنوان را وارد کنید",
+    "comment": "یادداشت اختیاری",
+    "paid": "مبلغ را وارد کنید"
+  },
+  "feedback": {
+    "saving": "در حال ذخیره…",
+    "saved": "ذخیره شد",
+    "noRows": "برای این ماه سطری وجود ندارد."
+  },
+  "units": {
+    "irt": "تومان",
+    "irm": "IRMT (میلیون تومان ایران)",
+    "usd": "دلار"
+  },
+  "kinds": {
+    "expense": "هزینه",
+    "income": "درآمد"
+  },
+  "totals": {
+    "overview": "نمای کلی",
+    "planned": "برنامه‌ریزی",
+    "paid": "پرداخت‌شده",
+    "pending": "باقی‌مانده",
+    "breakdown": "تفکیک",
+    "income": "درآمد",
+    "expenses": "هزینه‌ها"
+  }
+}
+
