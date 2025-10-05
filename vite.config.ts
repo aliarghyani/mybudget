@@ -2,6 +2,8 @@
 import vue from '@vitejs/plugin-vue';
 import path from 'node:path';
 import postcssLogical from 'postcss-logical';
+import tailwindcss from 'tailwindcss';
+import autoprefixer from 'autoprefixer';
 
 export default defineConfig({
   plugins: [vue()],
@@ -12,7 +14,11 @@ export default defineConfig({
   },
   css: {
     postcss: {
-      plugins: [postcssLogical()]
+      plugins: [
+        tailwindcss(),
+        postcssLogical(),
+        autoprefixer(),
+      ]
     }
   }
 });

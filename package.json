@@ -1,37 +1,42 @@
 {
-    "name":  "mybudget",
-    "version":  "0.0.1",
-    "private":  true,
-    "type":  "module",
-    "scripts":  {
-                    "dev":  "vite",
-                    "build":  "vite build",
-                    "preview":  "vite preview",
-                    "lint":  "eslint . --ext .ts,.vue",
-                    "format":  "prettier --write ."
-                },
-    "dependencies":  {
-                         "@vueuse/core":  "^11.1.0",
-                         "pinia":  "^2.1.7",
-                         "reka-ui":  "^2.5.1",
-                         "vue":  "^3.5.3",
-                         "vue-i18n":  "^10.0.5",
-                         "vue-router":  "^4.4.5"
-                     },
-    "devDependencies":  {
-                            "@tsconfig/node20":  "^20.1.4",
-                            "@types/node":  "^20.11.30",
-                            "@vitejs/plugin-vue":  "^5.1.2",
-                            "@vue/eslint-config-prettier":  "^10.2.0",
-                            "@vue/eslint-config-typescript":  "^13.0.0",
-                            "eslint":  "^8.57.0",
-                            "eslint-config-prettier":  "^9.1.0",
-                            "eslint-plugin-vue":  "^9.25.0",
-                            "postcss":  "^8.4.41",
-                            "postcss-logical":  "^5.0.4",
-                            "prettier":  "^3.3.3",
-                            "typescript":  "^5.5.4",
-                            "vite":  "^5.4.8",
-                            "vue-tsc":  "^2.1.6"
-                        }
+    "name": "mybudget",
+    "version": "0.0.1",
+    "private": true,
+    "type": "module",
+    "scripts": {
+        "dev": "vite",
+        "build": "vite build",
+        "preview": "vite preview",
+        "lint": "eslint . --ext .ts,.vue",
+        "format": "prettier --write ."
+    },
+    "dependencies": {
+        "@vueuse/core": "^11.1.0",
+        "pinia": "^2.1.7",
+        "reka-ui": "^2.5.1",
+        "vue": "^3.5.3",
+        "vue-i18n": "^10.0.5",
+        "vue-router": "^4.4.5"
+    },
+    "devDependencies": {
+        "@tsconfig/node20": "^20.1.4",
+        "@types/node": "^20.11.30",
+        "@vitejs/plugin-vue": "^5.1.2",
+        "@vue/eslint-config-prettier": "^10.2.0",
+        "@vue/eslint-config-typescript": "^13.0.0",
+        "@vue/test-utils": "^2.4.6",
+        "autoprefixer": "^10.4.21",
+        "eslint": "^8.57.0",
+        "eslint-config-prettier": "^9.1.0",
+        "eslint-plugin-vue": "^9.25.0",
+        "jsdom": "^27.0.0",
+        "postcss": "^8.4.41",
+        "postcss-logical": "^5.0.4",
+        "prettier": "^3.3.3",
+        "tailwindcss": "^3.4.13",
+        "typescript": "^5.5.4",
+        "vite": "^5.4.8",
+        "vitest": "^3.2.4",
+        "vue-tsc": "^2.1.6"
+    }
 }

@@ -1,4 +1,4 @@
-﻿<script setup lang="ts">
+<script setup lang="ts">
 import { storeToRefs } from 'pinia';
 import { computed } from 'vue';
 import { useI18n } from 'vue-i18n';
@@ -11,6 +11,19 @@ import {
   type FiatUnit,
   type Kind
 } from '@/composables/useMoney';
+import {
+  CheckboxRoot,
+  CheckboxIndicator,
+  SelectRoot,
+  SelectTrigger,
+  SelectValue,
+  SelectPortal,
+  SelectContent,
+  SelectViewport,
+  SelectItem,
+  SelectItemText,
+  SelectItemIndicator
+} from 'reka-ui';
 
 const ledgerStore = useLedgerStore();
 const settingsStore = useSettingsStore();
@@ -31,88 +44,75 @@ const kindOptions = computed(() => [
 
 function formattedUnitValue(irt: number, unit: FiatUnit): string {
   const result = convertFromIrt(irt, unit, settings.value.usdToIrt);
-  if (unit === 'USD') {
-    return result.toFixed(2);
-  }
-  if (unit === 'IRM') {
-    return Number(result.toFixed(3)).toString();
-  }
+  if (unit === 'USD') return result.toFixed(2);
+  if (unit === 'IRM') return Number(result.toFixed(3)).toString();
   return Math.round(result).toString();
 }
 
 function updateTitle(id: string, value: string) {
   ledgerStore.updateRow(id, { title: value });
 }
-
 function updateComment(id: string, value: string) {
   ledgerStore.updateRow(id, { comment: value });
 }
-
 function updateMust(id: string, value: boolean) {
   ledgerStore.updateRow(id, { must: value });
 }
-
 function updatePaidFlag(id: string, value: boolean) {
   ledgerStore.updateRow(id, { paidFlag: value });
 }
-
 function updateKind(id: string, value: Kind) {
   ledgerStore.updateRow(id, { kind: value });
 }
-
 function updateUnit(id: string, unit: FiatUnit) {
   ledgerStore.updateRow(id, { inputUnit: unit });
 }
-
 function handlePlannedBlur(rowId: string, unit: FiatUnit, value: string) {
   const parsed = parseMoney(value, unit, settings.value.usdToIrt);
   ledgerStore.updateRow(rowId, { plannedIRT: parsed });
 }
-
 function handlePaidBlur(rowId: string, unit: FiatUnit, value: string) {
   const parsed = parseMoney(value, unit, settings.value.usdToIrt);
   ledgerStore.updateRow(rowId, { paidIRT: parsed });
 }
-
 function displayPending(irt: number, unit: FiatUnit): string {
   return formatByUnit(irt, unit, locale.value, settings.value.usdToIrt);
 }
-
 function duplicateRow(id: string) {
   ledgerStore.duplicateRow(id);
 }
-
 function removeRow(id: string) {
   ledgerStore.removeRow(id);
 }
 </script>
 
 <template>
-  <section class="card-list">
+  <section class="grid gap-4">
     <article
       v-for="row in monthRows"
       :key="row.id"
-      class="card-list__card"
+      class="relative overflow-hidden rounded-2xl p-4 bg-white/85 dark:bg-slate-900/70 shadow-[0_12px_30px_rgba(15,23,42,.12)] grid gap-3"
       :data-kind="row.kind"
     >
-      <header class="card-list__header">
+      <div class="absolute inset-y-0 left-0 w-1.5" :class="row.kind === 'income' ? 'bg-gradient-to-b from-emerald-500 to-green-500' : 'bg-gradient-to-b from-cyan-500 to-sky-500'" />
+      <header class="flex items-center justify-between gap-3">
         <input
-          class="card-list__title"
+          class="flex-1 bg-transparent text-[1.05rem] font-semibold text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-cyan-300 rounded-lg px-1"
           type="text"
           :placeholder="t('placeholders.title')"
           :value="row.title"
           @input="updateTitle(row.id, ($event.target as HTMLInputElement).value)"
         />
-        <span class="card-list__badge" :data-kind="row.kind">
+        <span class="px-3 py-1 rounded-full text-[0.75rem] font-semibold uppercase" :class="row.kind === 'income' ? 'bg-emerald-500/20' : 'bg-cyan-500/20'">
           {{ row.kind === 'income' ? t('kinds.income') : t('kinds.expense') }}
         </span>
       </header>
 
-      <div class="card-list__grid">
-        <label class="card-list__field">
+      <div class="grid gap-3 [grid-template-columns:repeat(auto-fit,minmax(140px,1fr))]">
+        <label class="grid gap-1 text-[0.85rem] text-slate-500 dark:text-slate-400">
           <span>{{ t('table.planned') }}</span>
           <input
-            class="card-list__input"
+            class="rounded-lg border border-slate-300/60 dark:border-slate-700/60 bg-white/95 dark:bg-slate-800 px-3 py-2 text-[0.95rem] text-slate-900 dark:text-slate-100"
             type="text"
             inputmode="decimal"
             :value="formattedUnitValue(row.plannedIRT, row.inputUnit)"
@@ -120,32 +120,42 @@ function removeRow(id: string) {
           />
         </label>
 
-        <label class="card-list__field">
+        <label class="grid gap-1 text-[0.85rem] text-slate-500 dark:text-slate-400">
           <span>{{ t('table.unit') }}</span>
-          <select
-            class="card-list__select"
-            :value="row.inputUnit"
-            @change="updateUnit(row.id, ($event.target as HTMLSelectElement).value as FiatUnit)"
-          >
-            <option v-for="unit in unitOptions" :key="unit.value" :value="unit.value">
-              {{ unit.label }}
-            </option>
-          </select>
+          <SelectRoot :model-value="row.inputUnit" @update:modelValue="(val: any) => updateUnit(row.id, val)">
+            <SelectTrigger class="w-full rounded-lg border border-slate-300/60 dark:border-slate-700/60 bg-white/90 dark:bg-slate-800 px-3 py-2 text-left">
+              <SelectValue />
+            </SelectTrigger>
+            <SelectPortal>
+              <SelectContent class="z-50 min-w-[10rem] overflow-hidden rounded-xl border border-slate-200/60 dark:border-slate-700/60 bg-white dark:bg-slate-800 shadow-lg">
+                <SelectViewport class="p-1">
+                  <SelectItem v-for="unit in unitOptions" :key="unit.value" :value="unit.value" class="group flex items-center gap-2 rounded-lg px-2 py-2 data-[state=checked]:bg-cyan-50 dark:data-[state=checked]:bg-slate-700/40">
+                    <SelectItemIndicator>✓</SelectItemIndicator>
+                    <SelectItemText>{{ unit.label }}</SelectItemText>
+                  </SelectItem>
+                </SelectViewport>
+              </SelectContent>
+            </SelectPortal>
+          </SelectRoot>
         </label>
 
-        <label class="card-list__field card-list__field--checkbox">
+        <label class="grid gap-1 text-[0.85rem] text-slate-500 dark:text-slate-400">
           <span>{{ t('table.must') }}</span>
-          <input
-            type="checkbox"
-            :checked="row.must"
-            @change="updateMust(row.id, ($event.target as HTMLInputElement).checked)"
-          />
+          <div class="flex justify-end">
+            <CheckboxRoot
+              :model-value="row.must"
+              class="inline-grid place-items-center w-5 h-5 rounded border border-slate-400/60 data-[state=checked]:bg-cyan-500 data-[state=checked]:border-cyan-500"
+              @update:modelValue="(v: any) => updateMust(row.id, v === true)"
+            >
+              <CheckboxIndicator class="text-white">✓</CheckboxIndicator>
+            </CheckboxRoot>
+          </div>
         </label>
 
-        <label class="card-list__field">
+        <label class="grid gap-1 text-[0.85rem] text-slate-500 dark:text-slate-400">
           <span>{{ t('table.comment') }}</span>
           <input
-            class="card-list__input"
+            class="rounded-lg border border-slate-300/60 dark:border-slate-700/60 bg-white/95 dark:bg-slate-800 px-3 py-2 text-[0.95rem] text-slate-900 dark:text-slate-100"
             type="text"
             :placeholder="t('placeholders.comment')"
             :value="row.comment ?? ''"
@@ -153,19 +163,23 @@ function removeRow(id: string) {
           />
         </label>
 
-        <label class="card-list__field card-list__field--checkbox">
+        <label class="grid gap-1 text-[0.85rem] text-slate-500 dark:text-slate-400">
           <span>{{ t('table.paidFlag') }}</span>
-          <input
-            type="checkbox"
-            :checked="row.paidFlag"
-            @change="updatePaidFlag(row.id, ($event.target as HTMLInputElement).checked)"
-          />
+          <div class="flex justify-end">
+            <CheckboxRoot
+              :model-value="row.paidFlag"
+              class="inline-grid place-items-center w-5 h-5 rounded border border-slate-400/60 data-[state=checked]:bg-cyan-500 data-[state=checked]:border-cyan-500"
+              @update:modelValue="(v: any) => updatePaidFlag(row.id, v === true)"
+            >
+              <CheckboxIndicator class="text-white">✓</CheckboxIndicator>
+            </CheckboxRoot>
+          </div>
         </label>
 
-        <label class="card-list__field">
+        <label class="grid gap-1 text-[0.85rem] text-slate-500 dark:text-slate-400">
           <span>{{ t('table.paid') }}</span>
           <input
-            class="card-list__input"
+            class="rounded-lg border border-slate-300/60 dark:border-slate-700/60 bg-white/95 dark:bg-slate-800 px-3 py-2 text-[0.95rem] text-slate-900 dark:text-slate-100"
             type="text"
             inputmode="decimal"
             :placeholder="t('placeholders.paid')"
@@ -174,173 +188,42 @@ function removeRow(id: string) {
           />
         </label>
 
-        <label class="card-list__field">
+        <label class="grid gap-1 text-[0.85rem] text-slate-500 dark:text-slate-400">
           <span>{{ t('table.kind') }}</span>
-          <select
-            class="card-list__select"
-            :value="row.kind"
-            @change="updateKind(row.id, ($event.target as HTMLSelectElement).value as Kind)"
-          >
-            <option v-for="kind in kindOptions" :key="kind.value" :value="kind.value">
-              {{ kind.label }}
-            </option>
-          </select>
+          <SelectRoot :model-value="row.kind" @update:modelValue="(val: any) => updateKind(row.id, val)">
+            <SelectTrigger class="w-full rounded-lg border border-slate-300/60 dark:border-slate-700/60 bg-white/90 dark:bg-slate-800 px-3 py-2 text-left">
+              <SelectValue />
+            </SelectTrigger>
+            <SelectPortal>
+              <SelectContent class="z-50 min-w-[10rem] overflow-hidden rounded-xl border border-slate-200/60 dark:border-slate-700/60 bg-white dark:bg-slate-800 shadow-lg">
+                <SelectViewport class="p-1">
+                  <SelectItem v-for="opt in kindOptions" :key="opt.value" :value="opt.value" class="group flex items-center gap-2 rounded-lg px-2 py-2 data-[state=checked]:bg-cyan-50 dark:data-[state=checked]:bg-slate-700/40">
+                    <SelectItemIndicator>✓</SelectItemIndicator>
+                    <SelectItemText>{{ opt.label }}</SelectItemText>
+                  </SelectItem>
+                </SelectViewport>
+              </SelectContent>
+            </SelectPortal>
+          </SelectRoot>
         </label>
 
-        <div class="card-list__field card-list__field--pending">
+        <div class="grid gap-1 text-[0.85rem] text-slate-500 dark:text-slate-400">
           <span>{{ t('table.pending') }}</span>
-          <strong>{{ displayPending(pendingById[row.id] ?? 0, row.inputUnit) }}</strong>
+          <strong class="text-[1.05rem] text-slate-900 dark:text-slate-100">{{ displayPending(pendingById[row.id] ?? 0, row.inputUnit) }}</strong>
         </div>
       </div>
 
-      <footer class="card-list__footer">
-        <button type="button" class="card-list__action" @click="duplicateRow(row.id)">
+      <footer class="flex items-center justify-end gap-2">
+        <button type="button" class="px-3 py-1.5 rounded-full text-[0.85rem] bg-cyan-200/30 hover:bg-cyan-200/50" @click="duplicateRow(row.id)">
           {{ t('table.duplicate') }}
         </button>
-        <button
-          type="button"
-          class="card-list__action card-list__action--danger"
-          @click="removeRow(row.id)"
-        >
+        <button type="button" class="px-3 py-1.5 rounded-full text-[0.85rem] bg-red-500/15 text-red-700 dark:text-red-400 hover:bg-red-500/25" @click="removeRow(row.id)">
           {{ t('table.delete') }}
         </button>
       </footer>
     </article>
 
-    <p v-if="!monthRows.length" class="card-list__empty">{{ t('feedback.noRows') }}</p>
+    <p v-if="!monthRows.length" class="text-center p-4 text-slate-500">{{ t('feedback.noRows') }}</p>
   </section>
 </template>
 
-<style scoped>
-.card-list {
-  display: grid;
-  gap: 1rem;
-}
-
-.card-list__card {
-  border-radius: 1.25rem;
-  padding: 1rem;
-  background: rgba(255, 255, 255, 0.85);
-  box-shadow: 0 12px 30px rgba(15, 23, 42, 0.12);
-  display: flex;
-  flex-direction: column;
-  gap: 0.75rem;
-  position: relative;
-  overflow: hidden;
-}
-
-.card-list__card::before {
-  content: '';
-  position: absolute;
-  inset-inline-start: 0;
-  inset-block-start: 0;
-  inset-block-end: 0;
-  inline-size: 4px;
-  background: linear-gradient(180deg, rgba(34, 211, 238, 0.8), rgba(59, 130, 246, 0.8));
-}
-
-.card-list__card[data-kind='income']::before {
-  background: linear-gradient(180deg, rgba(16, 185, 129, 0.8), rgba(34, 197, 94, 0.8));
-}
-
-.card-list__header {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 0.75rem;
-}
-
-.card-list__title {
-  flex: 1;
-  border: none;
-  background: transparent;
-  font-size: 1.05rem;
-  font-weight: 600;
-  color: var(--rk-color-foreground, #0f172a);
-}
-
-.card-list__title:focus-visible {
-  outline: none;
-  box-shadow: inset 0 0 0 2px rgba(34, 211, 238, 0.45);
-  border-radius: 0.75rem;
-}
-
-.card-list__badge {
-  border-radius: 999px;
-  padding: 0.25rem 0.75rem;
-  font-size: 0.75rem;
-  font-weight: 600;
-  text-transform: uppercase;
-  background: rgba(34, 211, 238, 0.18);
-}
-
-.card-list__badge[data-kind='income'] {
-  background: rgba(16, 185, 129, 0.18);
-}
-
-.card-list__grid {
-  display: grid;
-  gap: 0.75rem;
-  grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
-}
-
-.card-list__field {
-  display: flex;
-  flex-direction: column;
-  gap: 0.35rem;
-  font-size: 0.85rem;
-  color: var(--rk-color-muted-foreground, #64748b);
-}
-
-.card-list__field--checkbox {
-  flex-direction: row;
-  align-items: center;
-  justify-content: space-between;
-}
-
-.card-list__field--pending strong {
-  font-size: 1.05rem;
-  color: var(--rk-color-foreground, #0f172a);
-}
-
-.card-list__input,
-.card-list__select {
-  border-radius: 0.75rem;
-  border: 1px solid rgba(148, 163, 184, 0.4);
-  padding: 0.5rem 0.75rem;
-  background: rgba(255, 255, 255, 0.95);
-  font-size: 0.95rem;
-}
-
-.card-list__input:focus-visible,
-.card-list__select:focus-visible {
-  outline: 2px solid rgba(34, 211, 238, 0.45);
-}
-
-.card-list__footer {
-  display: flex;
-  justify-content: flex-end;
-  gap: 0.5rem;
-}
-
-.card-list__action {
-  border: none;
-  border-radius: 999px;
-  padding: 0.45rem 1rem;
-  font-size: 0.85rem;
-  cursor: pointer;
-  background: rgba(34, 211, 238, 0.18);
-  color: var(--rk-color-foreground, #0f172a);
-}
-
-.card-list__action--danger {
-  background: rgba(239, 68, 68, 0.18);
-  color: #b91c1c;
-}
-
-.card-list__empty {
-  text-align: center;
-  padding: 1rem;
-  color: var(--rk-color-muted-foreground, #64748b);
-}
-</style>

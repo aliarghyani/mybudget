@@ -1,0 +1,353 @@
+<script setup lang="ts">
+import { computed, onBeforeUnmount, reactive, watch } from 'vue';
+import { storeToRefs } from 'pinia';
+import { RouterLink, useRoute } from 'vue-router';
+import { useI18n } from 'vue-i18n';
+import {
+  ToastClose,
+  ToastDescription,
+  ToastProvider,
+  ToastRoot,
+  ToastTitle,
+  ToastViewport
+} from 'reka-ui';
+import { useLedgerStore } from '@/stores/ledger';
+import { useSettingsStore } from '@/stores/settings';
+import { emitToast, useToastBus } from '@/composables/useNotifier';
+
+const { t, locale } = useI18n();
+const route = useRoute();
+const ledgerStore = useLedgerStore();
+const settingsStore = useSettingsStore();
+const { lastSavedAt } = storeToRefs(ledgerStore);
+const { settings } = storeToRefs(settingsStore);
+
+interface ToastState {
+  id: string;
+  title: string;
+  description?: string;
+  variant: 'default' | 'success' | 'danger';
+  open: boolean;
+}
+
+const toasts = reactive<ToastState[]>([]);
+
+const toastBus = useToastBus();
+const stopBus = toastBus.on((payload) => {
+  const id = payload.id ?? crypto.randomUUID?.() ?? Date.now().toString(36);
+  const toast: ToastState = {
+    id,
+    title: payload.title,
+    description: payload.description,
+    variant: payload.variant ?? 'default',
+    open: true
+  };
+  toasts.push(toast);
+  window.setTimeout(() => closeToast(id), 4200);
+});
+
+function closeToast(id: string) {
+  const index = toasts.findIndex((item) => item.id === id);
+  if (index !== -1) {
+    toasts[index].open = false;
+    window.setTimeout(() => {
+      const removeIndex = toasts.findIndex((item) => item.id === id);
+      if (removeIndex !== -1) {
+        toasts.splice(removeIndex, 1);
+      }
+    }, 320);
+  }
+}
+
+watch(lastSavedAt, (value, oldValue) => {
+  if (!value || value === oldValue) return;
+  emitToast({ title: t('toasts.autoSaved'), variant: 'success' });
+});
+
+let mediaQuery: MediaQueryList | null = null;
+
+function handleSystemThemeChange() {
+  if (settings.value.theme === 'system') {
+    applyResolvedTheme(mediaQuery?.matches ? 'dark' : 'light');
+  }
+}
+
+function applyResolvedTheme(value: 'light' | 'dark') {
+  if (typeof document === 'undefined') return;
+  const root = document.documentElement;
+  const body = document.body;
+  root.dataset.theme = value;
+  body.dataset.theme = value;
+}
+
+function applyTheme(theme: 'system' | 'light' | 'dark') {
+  if (typeof window === 'undefined') return;
+
+  if (theme === 'system') {
+    if (!mediaQuery) {
+      mediaQuery = window.matchMedia('(prefers-color-scheme: dark)');
+      mediaQuery.addEventListener('change', handleSystemThemeChange);
+    }
+    applyResolvedTheme(mediaQuery.matches ? 'dark' : 'light');
+  } else {
+    if (mediaQuery) {
+      mediaQuery.removeEventListener('change', handleSystemThemeChange);
+      mediaQuery = null;
+    }
+    applyResolvedTheme(theme);
+  }
+}
+
+watch(
+  () => settings.value.theme,
+  (theme) => applyTheme(theme),
+  { immediate: true }
+);
+
+watch(
+  () => settings.value.language,
+  (language) => {
+    locale.value = language;
+  },
+  { immediate: true }
+);
+
+const activePath = computed(() => route.path);
+
+function toggleLanguage() {
+  settingsStore.toggleLanguage();
+}
+
+onBeforeUnmount(() => {
+  stopBus();
+  if (mediaQuery) {
+    mediaQuery.removeEventListener('change', handleSystemThemeChange);
+    mediaQuery = null;
+  }
+});
+</script>
+
+<template>
+  <ToastProvider :duration="4000">
+    <div class="app-shell">
+      <header class="app-shell__topbar">
+        <div class="app-shell__brand">
+          <img src="/icon.svg" alt="" class="app-shell__logo" />
+          <span class="app-shell__title">{{ t('app.title') }}</span>
+        </div>
+        <nav class="app-shell__nav" :aria-label="t('nav.label')">
+          <RouterLink
+            to="/"
+            class="app-shell__nav-link"
+            :class="{ 'app-shell__nav-link--active': activePath === '/' }"
+          >
+            {{ t('nav.dashboard') }}
+          </RouterLink>
+          <RouterLink
+            to="/settings"
+            class="app-shell__nav-link"
+            :class="{ 'app-shell__nav-link--active': activePath.startsWith('/settings') }"
+          >
+            {{ t('nav.settings') }}
+          </RouterLink>
+        </nav>
+        <div class="app-shell__actions">
+          <button type="button" class="app-shell__lang" @click="toggleLanguage">
+            {{ settings.language === 'fa' ? 'FA' : 'EN' }}
+          </button>
+        </div>
+      </header>
+      <main class="app-shell__main">
+        <slot />
+      </main>
+    </div>
+
+    <div class="app-shell__toast-stack" role="status" aria-live="polite">
+      <ToastRoot
+        v-for="toast in toasts"
+        :key="toast.id"
+        v-model:open="toast.open"
+        class="app-shell__toast"
+        :data-variant="toast.variant"
+        @update:open="(open) => { if (!open) closeToast(toast.id); }"
+      >
+        <div class="app-shell__toast-body">
+          <ToastTitle>{{ toast.title }}</ToastTitle>
+          <ToastDescription v-if="toast.description">{{ toast.description }}</ToastDescription>
+        </div>
+        <div class="app-shell__toast-footer">
+          <button type="button" class="app-shell__toast-action" @click="closeToast(toast.id)">
+            {{ t('common.dismiss') }}
+          </button>
+          <ToastClose class="app-shell__toast-close" :aria-label="t('common.dismiss')">
+            x
+          </ToastClose>
+        </div>
+      </ToastRoot>
+    </div>
+    <ToastViewport class="app-shell__toast-viewport" />
+  </ToastProvider>
+</template>
+
+<style scoped>
+.app-shell {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  background: linear-gradient(180deg, rgba(15, 23, 42, 0.04), rgba(59, 130, 246, 0.08));
+}
+
+.app-shell__topbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 1rem clamp(1.25rem, 4vw, 2.5rem);
+  position: sticky;
+  top: 0;
+  backdrop-filter: blur(16px);
+  background: rgba(255, 255, 255, 0.78);
+  border-bottom: 1px solid rgba(226, 232, 240, 0.5);
+  z-index: 40;
+}
+
+.app-shell__brand {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.app-shell__logo {
+  inline-size: 38px;
+  block-size: 38px;
+  border-radius: 12px;
+}
+
+.app-shell__title {
+  font-weight: 700;
+  font-size: 1.2rem;
+}
+
+.app-shell__nav {
+  display: inline-flex;
+  gap: 0.75rem;
+}
+
+.app-shell__nav-link {
+  padding: 0.45rem 0.9rem;
+  border-radius: 999px;
+  color: var(--rk-color-muted-foreground, #64748b);
+  text-decoration: none;
+  font-weight: 600;
+}
+
+.app-shell__nav-link--active {
+  color: var(--rk-color-foreground, #0f172a);
+  background: rgba(34, 211, 238, 0.24);
+}
+
+.app-shell__actions {
+  display: inline-flex;
+  gap: 0.75rem;
+}
+
+.app-shell__lang {
+  border: none;
+  border-radius: 999px;
+  padding: 0.45rem 0.9rem;
+  cursor: pointer;
+  background: rgba(148, 163, 184, 0.2);
+  font-weight: 600;
+}
+
+.app-shell__main {
+  flex: 1;
+  padding: clamp(1rem, 4vw, 2rem);
+}
+
+.app-shell__toast-stack {
+  position: fixed;
+  inset-inline-end: 1.5rem;
+  inset-block-end: 1.5rem;
+  display: grid;
+  gap: 0.5rem;
+  z-index: 1000;
+}
+
+.app-shell__toast {
+  background: rgba(15, 23, 42, 0.92);
+  color: #f8fafc;
+  border-radius: 1rem;
+  padding: 1rem;
+  min-inline-size: 260px;
+  box-shadow: 0 20px 35px rgba(15, 23, 42, 0.4);
+  display: grid;
+  gap: 0.75rem;
+}
+
+.app-shell__toast[data-variant='success'] {
+  border-inline-start: 4px solid #22c55e;
+}
+
+.app-shell__toast[data-variant='danger'] {
+  border-inline-start: 4px solid #ef4444;
+}
+
+.app-shell__toast-body {
+  display: grid;
+  gap: 0.35rem;
+}
+
+.app-shell__toast-footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 0.75rem;
+  font-size: 0.85rem;
+}
+
+.app-shell__toast-action {
+  background: rgba(248, 250, 252, 0.12);
+  color: inherit;
+  border: none;
+  border-radius: 999px;
+  padding: 0.35rem 0.8rem;
+  cursor: pointer;
+}
+
+.app-shell__toast-close {
+  inline-size: 1.5rem;
+  block-size: 1.5rem;
+  display: grid;
+  place-items: center;
+  border-radius: 999px;
+  background: rgba(248, 250, 252, 0.12);
+  cursor: pointer;
+}
+
+.app-shell__toast-viewport {
+  display: none;
+}
+
+@media (max-width: 768px) {
+  .app-shell__topbar {
+    flex-direction: column;
+    gap: 0.75rem;
+    align-items: flex-start;
+  }
+
+  .app-shell__nav {
+    flex-wrap: wrap;
+  }
+
+  .app-shell__toast-stack {
+    inset-inline: 0;
+    inset-block-end: 1rem;
+    padding-inline: 1rem;
+  }
+
+  .app-shell__toast {
+    min-inline-size: auto;
+  }
+}
+</style>
+

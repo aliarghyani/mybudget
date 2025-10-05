@@ -43,55 +43,22 @@ function addRow() {
 </script>
 
 <template>
-  <div class="dashboard">
-    <section class="dashboard__header">
-      <div class="dashboard__meta">
+  <div class="grid gap-6">
+    <section class="grid gap-6">
+      <div class="flex flex-wrap items-center justify-between gap-4">
         <MonthPicker v-model="currentMonth" />
-        <button type="button" class="dashboard__add" @click="addRow">
+        <button type="button" class="rounded-full px-4 py-2 font-semibold bg-cyan-200/40 text-slate-900 hover:bg-cyan-200/60" @click="addRow">
           {{ t('dashboard.addRow') }}
         </button>
       </div>
       <TotalsBar />
     </section>
 
-    <section class="dashboard__content">
+    <section class="grid">
       <BudgetTable v-if="isDesktop" />
       <BudgetCardList v-else />
     </section>
   </div>
 </template>
 
-<style scoped>
-.dashboard {
-  display: grid;
-  gap: 1.5rem;
-}
-
-.dashboard__header {
-  display: grid;
-  gap: 1.5rem;
-}
-
-.dashboard__meta {
-  display: flex;
-  gap: 1rem;
-  flex-wrap: wrap;
-  align-items: center;
-  justify-content: space-between;
-}
-
-.dashboard__add {
-  border: none;
-  border-radius: 999px;
-  padding: 0.55rem 1.2rem;
-  background: rgba(34, 211, 238, 0.24);
-  color: var(--rk-color-foreground, #0f172a);
-  font-weight: 600;
-  cursor: pointer;
-}
-
-.dashboard__content {
-  display: grid;
-}
-</style>
 

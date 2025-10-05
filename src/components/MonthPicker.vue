@@ -34,91 +34,16 @@ function shiftMonth(delta: number) {
 </script>
 
 <template>
-  <div class="month-picker" role="group" :aria-label="t('dashboard.monthGroupLabel')">
-    <button
-      type="button"
-      class="month-picker__button"
-      :aria-label="t('dashboard.prevMonth')"
-      @click="shiftMonth(-1)"
-    >
-      <
+  <div class="inline-flex items-center gap-2 bg-white/85 dark:bg-slate-900/70 rounded-full px-3 py-1 border border-slate-200/60 dark:border-slate-700/60" role="group" :aria-label="t('dashboard.monthGroupLabel')">
+    <button type="button" class="w-8 h-8 grid place-items-center rounded-full text-lg hover:bg-slate-200/60 dark:hover:bg-slate-700/60" :aria-label="t('dashboard.prevMonth')" @click="shiftMonth(-1)">
+      ‹
     </button>
-    <label class="month-picker__label">
+    <label class="relative">
       <span class="sr-only">{{ t('dashboard.monthInputLabel') }}</span>
-      <input
-        v-model="monthValue"
-        type="month"
-        inputmode="numeric"
-        class="month-picker__input"
-      />
+      <input v-model="monthValue" type="month" inputmode="numeric" class="bg-transparent font-semibold min-w-[7.5rem] focus:outline-none" />
     </label>
-    <button
-      type="button"
-      class="month-picker__button"
-      :aria-label="t('dashboard.nextMonth')"
-      @click="shiftMonth(1)"
-    >
-      >
+    <button type="button" class="w-8 h-8 grid place-items-center rounded-full text-lg hover:bg-slate-200/60 dark:hover:bg-slate-700/60" :aria-label="t('dashboard.nextMonth')" @click="shiftMonth(1)">
+      ›
     </button>
   </div>
 </template>
-
-<style scoped>
-.month-picker {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.5rem;
-  background: var(--rk-color-surface, rgba(255, 255, 255, 0.85));
-  border-radius: 999px;
-  padding-inline: 0.75rem;
-  padding-block: 0.35rem;
-  box-shadow: inset 0 0 0 1px rgba(148, 163, 184, 0.18);
-}
-
-.month-picker__button {
-  border: none;
-  background: transparent;
-  font-size: 1.35rem;
-  cursor: pointer;
-  color: var(--rk-color-foreground, #0f172a);
-  inline-size: 2rem;
-  block-size: 2rem;
-  border-radius: 999px;
-  display: grid;
-  place-items: center;
-}
-
-.month-picker__button:hover,
-.month-picker__button:focus-visible {
-  background: rgba(148, 163, 184, 0.18);
-}
-
-.month-picker__label {
-  position: relative;
-}
-
-.month-picker__input {
-  border: none;
-  background: transparent;
-  font-size: 1rem;
-  font-weight: 600;
-  color: inherit;
-  min-inline-size: 7.5rem;
-}
-
-.month-picker__input:focus-visible {
-  outline: none;
-}
-
-.sr-only {
-  position: absolute;
-  inline-size: 1px;
-  block-size: 1px;
-  padding: 0;
-  margin: -1px;
-  overflow: hidden;
-  clip: rect(0, 0, 0, 0);
-  white-space: nowrap;
-  border: 0;
-}
-</style>

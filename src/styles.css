@@ -1,58 +1,30 @@
-﻿:root {
-  color-scheme: light dark;
-  font-family: 'Inter', 'Vazirmatn', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    color-scheme: light dark;
+    font-family: 'Inter', 'Vazirmatn', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  }
+
+  html, body, #app {
+    @apply min-h-screen;
+  }
+
+  body {
+    @apply bg-slate-50 text-slate-900 dark:bg-slate-900 dark:text-slate-100 transition-colors duration-200 ease-out m-0 antialiased;
+  }
+
+  a {
+    @apply text-inherit no-underline hover:underline;
+  }
+
+  :focus-visible {
+    @apply outline-none ring-2 ring-cyan-400 ring-offset-2 ring-offset-transparent;
+  }
+
+  body.rtl { direction: rtl; }
+  body.ltr { direction: ltr; }
 }
 
-body {
-  margin: 0;
-  min-height: 100vh;
-  background-color: var(--rk-color-surface, #f5f5f5);
-  color: var(--rk-color-foreground, #111827);
-  transition: background-color 0.2s ease, color 0.2s ease;
-}
-
-body.rtl {
-  direction: rtl;
-}
-
-body.ltr {
-  direction: ltr;
-}
-
-#app {
-  min-height: 100vh;
-}
-
-a {
-  color: inherit;
-  text-decoration: none;
-}
-
-a:hover {
-  text-decoration: underline;
-}
-
-:focus-visible {
-  outline: 2px solid var(--rk-color-primary-500, #22d3ee);
-  outline-offset: 2px;
-}
-
-.table-density-comfortable {
-  --row-padding-block: 0.75rem;
-  --row-padding-inline: 1rem;
-}
-
-.table-density-compact {
-  --row-padding-block: 0.4rem;
-  --row-padding-inline: 0.6rem;
-}
-
-.table-density-comfortable tr > * {
-  padding-block: var(--row-padding-block);
-  padding-inline: var(--row-padding-inline);
-}
-
-.table-density-compact tr > * {
-  padding-block: var(--row-padding-block);
-  padding-inline: var(--row-padding-inline);
-}

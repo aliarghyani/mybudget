@@ -1,4 +1,4 @@
-﻿<script setup lang="ts">
+<script setup lang="ts">
 import { computed, onBeforeUnmount, reactive, watch } from 'vue';
 import { storeToRefs } from 'pinia';
 import { RouterLink, useRoute } from 'vue-router';
@@ -76,8 +76,17 @@ function applyResolvedTheme(value: 'light' | 'dark') {
   if (typeof document === 'undefined') return;
   const root = document.documentElement;
   const body = document.body;
+  // Keep previous data attributes for compatibility with existing CSS variables
   root.dataset.theme = value;
   body.dataset.theme = value;
+  // Toggle Tailwind dark mode class
+  if (value === 'dark') {
+    root.classList.add('dark');
+    body.classList.add('dark');
+  } else {
+    root.classList.remove('dark');
+    body.classList.remove('dark');
+  }
 }
 
 function applyTheme(theme: 'system' | 'light' | 'dark') {
@@ -129,225 +138,67 @@ onBeforeUnmount(() => {
 
 <template>
   <ToastProvider :duration="4000">
-    <div class="app-shell">
-      <header class="app-shell__topbar">
-        <div class="app-shell__brand">
-          <img src="/icon.svg" alt="" class="app-shell__logo" />
-          <span class="app-shell__title">{{ t('app.title') }}</span>
+    <div class="min-h-screen flex flex-col bg-gradient-to-b from-slate-900/5 to-sky-500/10 dark:from-slate-50/5 dark:to-sky-400/10">
+      <header class="sticky top-0 z-40 flex items-center justify-between gap-3 px-5 py-4 backdrop-blur border-b border-slate-200/50 bg-white/80 dark:bg-slate-900/70">
+        <div class="inline-flex items-center gap-3">
+          <img src="/icon.svg" alt="" class="w-9 h-9 rounded-xl" />
+          <span class="font-bold text-lg">{{ t('app.title') }}</span>
         </div>
-        <nav class="app-shell__nav" :aria-label="t('nav.label')">
+        <nav class="inline-flex flex-wrap gap-2" :aria-label="t('nav.label')">
           <RouterLink
             to="/"
-            class="app-shell__nav-link"
-            :class="{ 'app-shell__nav-link--active': activePath === '/' }"
+            class="px-3 py-2 rounded-full font-semibold text-slate-500 hover:text-slate-900 dark:text-slate-400 dark:hover:text-slate-100"
+            :class="{ 'bg-cyan-200/40 text-slate-900 dark:text-slate-900': activePath === '/' }"
           >
             {{ t('nav.dashboard') }}
           </RouterLink>
           <RouterLink
             to="/settings"
-            class="app-shell__nav-link"
-            :class="{ 'app-shell__nav-link--active': activePath.startsWith('/settings') }"
+            class="px-3 py-2 rounded-full font-semibold text-slate-500 hover:text-slate-900 dark:text-slate-400 dark:hover:text-slate-100"
+            :class="{ 'bg-cyan-200/40 text-slate-900 dark:text-slate-900': activePath.startsWith('/settings') }"
           >
             {{ t('nav.settings') }}
           </RouterLink>
         </nav>
-        <div class="app-shell__actions">
-          <button type="button" class="app-shell__lang" @click="toggleLanguage">
+        <div class="inline-flex gap-2">
+          <button
+            type="button"
+            class="px-3 py-2 rounded-full bg-slate-200/50 hover:bg-slate-300/60 dark:bg-slate-700/50 dark:hover:bg-slate-700 font-semibold"
+            @click="toggleLanguage"
+          >
             {{ settings.language === 'fa' ? 'FA' : 'EN' }}
           </button>
         </div>
       </header>
-      <main class="app-shell__main">
+      <main class="flex-1 p-4 sm:p-6">
         <slot />
       </main>
     </div>
 
-    <div class="app-shell__toast-stack" role="status" aria-live="polite">
+    <div class="fixed end-6 bottom-6 grid gap-2 z-[1000]" role="status" aria-live="polite">
       <ToastRoot
         v-for="toast in toasts"
         :key="toast.id"
         v-model:open="toast.open"
-        class="app-shell__toast"
-        :data-variant="toast.variant"
+        class="grid gap-2 rounded-2xl p-4 min-w-[260px] bg-slate-900 text-slate-50 shadow-2xl"
+        :class="toast.variant === 'success' ? 'border-l-4 border-green-500' : toast.variant === 'danger' ? 'border-l-4 border-red-500' : 'border-l-4 border-cyan-400'"
         @update:open="(open) => { if (!open) closeToast(toast.id); }"
       >
-        <div class="app-shell__toast-body">
-          <ToastTitle>{{ toast.title }}</ToastTitle>
-          <ToastDescription v-if="toast.description">{{ toast.description }}</ToastDescription>
+        <div class="grid gap-1">
+          <ToastTitle class="font-semibold">{{ toast.title }}</ToastTitle>
+          <ToastDescription v-if="toast.description" class="text-slate-200">{{ toast.description }}</ToastDescription>
         </div>
-        <div class="app-shell__toast-footer">
-          <button type="button" class="app-shell__toast-action" @click="closeToast(toast.id)">
+        <div class="flex items-center justify-between gap-2 text-sm">
+          <button type="button" class="px-2 py-1 rounded-full bg-slate-50/10" @click="closeToast(toast.id)">
             {{ t('common.dismiss') }}
           </button>
-          <ToastClose class="app-shell__toast-close" :aria-label="t('common.dismiss')">
-            x
+          <ToastClose class="w-6 h-6 grid place-items-center rounded-full bg-slate-50/10" :aria-label="t('common.dismiss')">
+            ×
           </ToastClose>
         </div>
       </ToastRoot>
     </div>
-    <ToastViewport class="app-shell__toast-viewport" />
+    <ToastViewport class="hidden" />
   </ToastProvider>
 </template>
-
-<style scoped>
-.app-shell {
-  min-height: 100vh;
-  display: flex;
-  flex-direction: column;
-  background: linear-gradient(180deg, rgba(15, 23, 42, 0.04), rgba(59, 130, 246, 0.08));
-}
-
-.app-shell__topbar {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 1rem clamp(1.25rem, 4vw, 2.5rem);
-  position: sticky;
-  top: 0;
-  backdrop-filter: blur(16px);
-  background: rgba(255, 255, 255, 0.78);
-  border-bottom: 1px solid rgba(226, 232, 240, 0.5);
-  z-index: 40;
-}
-
-.app-shell__brand {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.75rem;
-}
-
-.app-shell__logo {
-  inline-size: 38px;
-  block-size: 38px;
-  border-radius: 12px;
-}
-
-.app-shell__title {
-  font-weight: 700;
-  font-size: 1.2rem;
-}
-
-.app-shell__nav {
-  display: inline-flex;
-  gap: 0.75rem;
-}
-
-.app-shell__nav-link {
-  padding: 0.45rem 0.9rem;
-  border-radius: 999px;
-  color: var(--rk-color-muted-foreground, #64748b);
-  text-decoration: none;
-  font-weight: 600;
-}
-
-.app-shell__nav-link--active {
-  color: var(--rk-color-foreground, #0f172a);
-  background: rgba(34, 211, 238, 0.24);
-}
-
-.app-shell__actions {
-  display: inline-flex;
-  gap: 0.75rem;
-}
-
-.app-shell__lang {
-  border: none;
-  border-radius: 999px;
-  padding: 0.45rem 0.9rem;
-  cursor: pointer;
-  background: rgba(148, 163, 184, 0.2);
-  font-weight: 600;
-}
-
-.app-shell__main {
-  flex: 1;
-  padding: clamp(1rem, 4vw, 2rem);
-}
-
-.app-shell__toast-stack {
-  position: fixed;
-  inset-inline-end: 1.5rem;
-  inset-block-end: 1.5rem;
-  display: grid;
-  gap: 0.5rem;
-  z-index: 1000;
-}
-
-.app-shell__toast {
-  background: rgba(15, 23, 42, 0.92);
-  color: #f8fafc;
-  border-radius: 1rem;
-  padding: 1rem;
-  min-inline-size: 260px;
-  box-shadow: 0 20px 35px rgba(15, 23, 42, 0.4);
-  display: grid;
-  gap: 0.75rem;
-}
-
-.app-shell__toast[data-variant='success'] {
-  border-inline-start: 4px solid #22c55e;
-}
-
-.app-shell__toast[data-variant='danger'] {
-  border-inline-start: 4px solid #ef4444;
-}
-
-.app-shell__toast-body {
-  display: grid;
-  gap: 0.35rem;
-}
-
-.app-shell__toast-footer {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  gap: 0.75rem;
-  font-size: 0.85rem;
-}
-
-.app-shell__toast-action {
-  background: rgba(248, 250, 252, 0.12);
-  color: inherit;
-  border: none;
-  border-radius: 999px;
-  padding: 0.35rem 0.8rem;
-  cursor: pointer;
-}
-
-.app-shell__toast-close {
-  inline-size: 1.5rem;
-  block-size: 1.5rem;
-  display: grid;
-  place-items: center;
-  border-radius: 999px;
-  background: rgba(248, 250, 252, 0.12);
-  cursor: pointer;
-}
-
-.app-shell__toast-viewport {
-  display: none;
-}
-
-@media (max-width: 768px) {
-  .app-shell__topbar {
-    flex-direction: column;
-    gap: 0.75rem;
-    align-items: flex-start;
-  }
-
-  .app-shell__nav {
-    flex-wrap: wrap;
-  }
-
-  .app-shell__toast-stack {
-    inset-inline: 0;
-    inset-block-end: 1rem;
-    padding-inline: 1rem;
-  }
-
-  .app-shell__toast {
-    min-inline-size: auto;
-  }
-}
-</style>
 

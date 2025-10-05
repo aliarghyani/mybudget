@@ -1,10 +1,23 @@
-﻿<script setup lang="ts">
+<script setup lang="ts">
 import { computed, nextTick } from 'vue';
 import { storeToRefs } from 'pinia';
 import { useLedgerStore } from '@/stores/ledger';
 import { useSettingsStore } from '@/stores/settings';
 import { convertFromIrt, formatByUnit, parseMoney, type FiatUnit, type Kind } from '@/composables/useMoney';
 import { useI18n } from 'vue-i18n';
+import {
+  CheckboxRoot,
+  CheckboxIndicator,
+  SelectRoot,
+  SelectTrigger,
+  SelectValue,
+  SelectPortal,
+  SelectContent,
+  SelectViewport,
+  SelectItem,
+  SelectItemText,
+  SelectItemIndicator
+} from 'reka-ui';
 
 const ledgerStore = useLedgerStore();
 const settingsStore = useSettingsStore();
@@ -12,9 +25,7 @@ const { monthRows, pendingById, isSaving } = storeToRefs(ledgerStore);
 const { settings } = storeToRefs(settingsStore);
 const { t, locale } = useI18n();
 
-const densityClass = computed(() =>
-  settings.value.density === 'compact' ? 'table-density-compact' : 'table-density-comfortable'
-);
+const cellPad = computed(() => (settings.value.density === 'compact' ? 'px-3 py-2' : 'px-4 py-3'));
 
 const unitOptions = computed(() => [
   { label: t('units.irt'), value: 'IRT' },
@@ -107,37 +118,34 @@ function removeRow(id: string) {
 </script>
 
 <template>
-  <div class="table-shell">
-    <div class="table-shell__status" role="status" aria-live="polite">
-      <span
-        class="table-shell__status-dot"
-        :class="{ 'table-shell__status-dot--saving': isSaving }"
-      />
+  <div class="grid gap-3">
+    <div class="inline-flex items-center gap-2 text-sm text-slate-500" role="status" aria-live="polite">
+      <span class="inline-block w-2.5 h-2.5 rounded-full" :class="isSaving ? 'bg-amber-500' : 'bg-emerald-500'" />
       <span>{{ isSaving ? t('feedback.saving') : t('feedback.saved') }}</span>
     </div>
-    <div class="table-shell__container">
-      <table class="budget-table" :class="densityClass">
+    <div class="rounded-2xl overflow-hidden border border-slate-200/60 dark:border-slate-700/60 bg-white/70 dark:bg-slate-900/60 backdrop-blur overflow-x-auto">
+      <table class="w-full min-w-[960px] border-collapse">
         <thead>
-          <tr>
-            <th scope="col">{{ t('table.title') }}</th>
-            <th scope="col">{{ t('table.planned') }}</th>
-            <th scope="col" class="budget-table__unit">{{ t('table.unit') }}</th>
-            <th scope="col">{{ t('table.must') }}</th>
-            <th scope="col">{{ t('table.comment') }}</th>
-            <th scope="col">{{ t('table.paidFlag') }}</th>
-            <th scope="col">{{ t('table.paid') }}</th>
-            <th scope="col">{{ t('table.pending') }}</th>
-            <th scope="col">{{ t('table.kind') }}</th>
-            <th scope="col" class="budget-table__actions">{{ t('table.actions') }}</th>
+          <tr class="text-[0.8rem] uppercase tracking-wide text-slate-500">
+            <th scope="col" :class="cellPad + ' text-start'">{{ t('table.title') }}</th>
+            <th scope="col" :class="cellPad + ' text-start'">{{ t('table.planned') }}</th>
+            <th scope="col" :class="cellPad + ' text-start w-32'">{{ t('table.unit') }}</th>
+            <th scope="col" :class="cellPad + ' text-center'">{{ t('table.must') }}</th>
+            <th scope="col" :class="cellPad + ' text-start'">{{ t('table.comment') }}</th>
+            <th scope="col" :class="cellPad + ' text-center'">{{ t('table.paidFlag') }}</th>
+            <th scope="col" :class="cellPad + ' text-start'">{{ t('table.paid') }}</th>
+            <th scope="col" :class="cellPad + ' text-start'">{{ t('table.pending') }}</th>
+            <th scope="col" :class="cellPad + ' text-start'">{{ t('table.kind') }}</th>
+            <th scope="col" :class="cellPad + ' text-start'">{{ t('table.actions') }}</th>
           </tr>
         </thead>
         <tbody>
-          <tr v-for="(row, rowIndex) in monthRows" :key="row.id">
-            <td data-label="title">
+          <tr v-for="(row, rowIndex) in monthRows" :key="row.id" class="border-b border-slate-200/70 dark:border-slate-700/60 hover:bg-slate-100/50 dark:hover:bg-slate-800/30">
+            <td :class="cellPad">
               <input
                 :data-row-id="row.id"
                 data-focus-index="0"
-                class="budget-table__input budget-table__input--text"
+                class="w-full bg-transparent text-[0.95rem] text-slate-900 dark:text-slate-100 rounded-lg focus:outline-none focus:ring-2 focus:ring-cyan-300"
                 type="text"
                 :placeholder="t('placeholders.title')"
                 :value="row.title"
@@ -145,11 +153,11 @@ function removeRow(id: string) {
                 @keydown="onKeyNavigation($event, row.id, 0)"
               />
             </td>
-            <td data-label="planned">
+            <td :class="cellPad">
               <input
                 :data-row-id="row.id"
                 data-focus-index="1"
-                class="budget-table__input budget-table__input--number"
+                class="w-full bg-transparent text-[0.95rem] text-end text-slate-900 dark:text-slate-100 rounded-lg focus:outline-none focus:ring-2 focus:ring-cyan-300"
                 type="text"
                 inputmode="decimal"
                 :value="formattedUnitValue(row.plannedIRT, row.inputUnit)"
@@ -157,35 +165,45 @@ function removeRow(id: string) {
                 @keydown="onKeyNavigation($event, row.id, 1)"
               />
             </td>
-            <td data-label="unit" class="budget-table__unit">
-              <select
-                :data-row-id="row.id"
-                data-focus-index="2"
-                class="budget-table__select"
-                :value="row.inputUnit"
-                @change="updateUnit(row.id, ($event.target as HTMLSelectElement).value as FiatUnit)"
-                @keydown="onKeyNavigation($event, row.id, 2)"
-              >
-                <option v-for="unit in unitOptions" :key="unit.value" :value="unit.value">
-                  {{ unit.label }}
-                </option>
-              </select>
+            <td :class="cellPad + ' w-32'">
+              <SelectRoot :model-value="row.inputUnit" @update:modelValue="(val: any) => updateUnit(row.id, val)">
+                <SelectTrigger
+                  :data-row-id="row.id"
+                  data-focus-index="2"
+                  class="w-full rounded-lg border border-slate-300/60 dark:border-slate-700/60 bg-white/90 dark:bg-slate-800 px-2 py-1.5 text-left"
+                  @keydown="onKeyNavigation($event, row.id, 2)"
+                >
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectPortal>
+                  <SelectContent class="z-50 min-w-[8rem] overflow-hidden rounded-xl border border-slate-200/60 dark:border-slate-700/60 bg-white dark:bg-slate-800 shadow-lg">
+                    <SelectViewport class="p-1">
+                      <SelectItem v-for="unit in unitOptions" :key="unit.value" :value="unit.value" class="group flex items-center gap-2 rounded-lg px-2 py-2 data-[state=checked]:bg-cyan-50 dark:data-[state=checked]:bg-slate-700/40">
+                        <SelectItemIndicator>✓</SelectItemIndicator>
+                        <SelectItemText>{{ unit.label }}</SelectItemText>
+                      </SelectItem>
+                    </SelectViewport>
+                  </SelectContent>
+                </SelectPortal>
+              </SelectRoot>
             </td>
-            <td data-label="must" class="budget-table__checkbox">
-              <input
+            <td :class="cellPad + ' text-center'">
+              <CheckboxRoot
+                :model-value="row.must"
+                class="inline-grid place-items-center w-5 h-5 rounded border border-slate-400/60 data-[state=checked]:bg-cyan-500 data-[state=checked]:border-cyan-500"
+                @update:modelValue="(v: any) => updateMust(row.id, v === true)"
                 :data-row-id="row.id"
                 data-focus-index="3"
-                type="checkbox"
-                :checked="row.must"
-                @change="updateMust(row.id, ($event.target as HTMLInputElement).checked)"
                 @keydown="onKeyNavigation($event, row.id, 3)"
-              />
+              >
+                <CheckboxIndicator class="text-white">✓</CheckboxIndicator>
+              </CheckboxRoot>
             </td>
-            <td data-label="comment">
+            <td :class="cellPad">
               <input
                 :data-row-id="row.id"
                 data-focus-index="4"
-                class="budget-table__input budget-table__input--text"
+                class="w-full bg-transparent text-[0.95rem] text-slate-900 dark:text-slate-100 rounded-lg focus:outline-none focus:ring-2 focus:ring-cyan-300"
                 type="text"
                 :placeholder="t('placeholders.comment')"
                 :value="row.comment ?? ''"
@@ -193,21 +211,23 @@ function removeRow(id: string) {
                 @keydown="onKeyNavigation($event, row.id, 4)"
               />
             </td>
-            <td data-label="paidFlag" class="budget-table__checkbox">
-              <input
+            <td :class="cellPad + ' text-center'">
+              <CheckboxRoot
+                :model-value="row.paidFlag"
+                class="inline-grid place-items-center w-5 h-5 rounded border border-slate-400/60 data-[state=checked]:bg-cyan-500 data-[state=checked]:border-cyan-500"
+                @update:modelValue="(v: any) => updatePaidFlag(row.id, v === true)"
                 :data-row-id="row.id"
                 data-focus-index="5"
-                type="checkbox"
-                :checked="row.paidFlag"
-                @change="updatePaidFlag(row.id, ($event.target as HTMLInputElement).checked)"
                 @keydown="onKeyNavigation($event, row.id, 5)"
-              />
+              >
+                <CheckboxIndicator class="text-white">✓</CheckboxIndicator>
+              </CheckboxRoot>
             </td>
-            <td data-label="paid">
+            <td :class="cellPad">
               <input
                 :data-row-id="row.id"
                 data-focus-index="6"
-                class="budget-table__input budget-table__input--number"
+                class="w-full bg-transparent text-[0.95rem] text-end text-slate-900 dark:text-slate-100 rounded-lg focus:outline-none focus:ring-2 focus:ring-cyan-300"
                 type="text"
                 inputmode="decimal"
                 :value="row.paidIRT !== undefined ? formattedUnitValue(row.paidIRT, row.inputUnit) : ''"
@@ -216,48 +236,58 @@ function removeRow(id: string) {
                 @keydown="onKeyNavigation($event, row.id, 6)"
               />
             </td>
-            <td data-label="pending" class="budget-table__pending">
+            <td :class="cellPad + ' font-semibold text-slate-900 dark:text-slate-100'">
               {{ displayPending(pendingById[row.id] ?? 0, row.inputUnit) }}
             </td>
-            <td data-label="kind">
-              <select
-                :data-row-id="row.id"
-                data-focus-index="7"
-                class="budget-table__select"
-                :value="row.kind"
-                @change="updateKind(row.id, ($event.target as HTMLSelectElement).value as Kind)"
-                @keydown="onKeyNavigation($event, row.id, 7)"
-              >
-                <option v-for="kind in kindOptions" :key="kind.value" :value="kind.value">
-                  {{ kind.label }}
-                </option>
-              </select>
+            <td :class="cellPad">
+              <SelectRoot :model-value="row.kind" @update:modelValue="(val: any) => updateKind(row.id, val)">
+                <SelectTrigger
+                  :data-row-id="row.id"
+                  data-focus-index="7"
+                  class="w-full rounded-lg border border-slate-300/60 dark:border-slate-700/60 bg-white/90 dark:bg-slate-800 px-2 py-1.5 text-left"
+                  @keydown="onKeyNavigation($event, row.id, 7)"
+                >
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectPortal>
+                  <SelectContent class="z-50 min-w-[8rem] overflow-hidden rounded-xl border border-slate-200/60 dark:border-slate-700/60 bg-white dark:bg-slate-800 shadow-lg">
+                    <SelectViewport class="p-1">
+                      <SelectItem v-for="opt in kindOptions" :key="opt.value" :value="opt.value" class="group flex items-center gap-2 rounded-lg px-2 py-2 data-[state=checked]:bg-cyan-50 dark:data-[state=checked]:bg-slate-700/40">
+                        <SelectItemIndicator>✓</SelectItemIndicator>
+                        <SelectItemText>{{ opt.label }}</SelectItemText>
+                      </SelectItem>
+                    </SelectViewport>
+                  </SelectContent>
+                </SelectPortal>
+              </SelectRoot>
             </td>
-            <td class="budget-table__actions" data-label="actions">
-              <button
-                :data-row-id="row.id"
-                data-focus-index="8"
-                type="button"
-                class="budget-table__action"
-                @click="duplicateRow(row.id)"
-                @keydown="onKeyNavigation($event, row.id, 8)"
-              >
-                {{ t('table.duplicate') }}
-              </button>
-              <button
-                :data-row-id="row.id"
-                data-focus-index="9"
-                type="button"
-                class="budget-table__action budget-table__action--danger"
-                @click="removeRow(row.id)"
-                @keydown="onKeyNavigation($event, row.id, 9)"
-              >
-                {{ t('table.delete') }}
-              </button>
+            <td :class="cellPad">
+              <div class="flex items-center gap-2">
+                <button
+                  :data-row-id="row.id"
+                  data-focus-index="8"
+                  type="button"
+                  class="px-3 py-1.5 rounded-full text-[0.85rem] bg-cyan-200/30 hover:bg-cyan-200/50"
+                  @click="duplicateRow(row.id)"
+                  @keydown="onKeyNavigation($event, row.id, 8)"
+                >
+                  {{ t('table.duplicate') }}
+                </button>
+                <button
+                  :data-row-id="row.id"
+                  data-focus-index="9"
+                  type="button"
+                  class="px-3 py-1.5 rounded-full text-[0.85rem] bg-red-500/15 text-red-700 dark:text-red-400 hover:bg-red-500/25"
+                  @click="removeRow(row.id)"
+                  @keydown="onKeyNavigation($event, row.id, 9)"
+                >
+                  {{ t('table.delete') }}
+                </button>
+              </div>
             </td>
           </tr>
           <tr v-if="!monthRows.length">
-            <td class="budget-table__empty" colspan="10">
+            <td class="px-4 py-6 text-center text-slate-500" colspan="10">
               {{ t('feedback.noRows') }}
             </td>
           </tr>
@@ -266,148 +296,3 @@ function removeRow(id: string) {
     </div>
   </div>
 </template>
-
-<style scoped>
-.table-shell {
-  display: flex;
-  flex-direction: column;
-  gap: 0.75rem;
-}
-
-.table-shell__status {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.5rem;
-  font-size: 0.85rem;
-  color: var(--rk-color-muted-foreground, #64748b);
-}
-
-.table-shell__status-dot {
-  inline-size: 0.65rem;
-  block-size: 0.65rem;
-  border-radius: 50%;
-  background: #10b981;
-  transition: background 0.2s ease;
-}
-
-.table-shell__status-dot--saving {
-  background: #f97316;
-}
-
-.table-shell__container {
-  border-radius: 1.25rem;
-  overflow: hidden;
-  box-shadow: inset 0 0 0 1px rgba(148, 163, 184, 0.25);
-  background: rgba(255, 255, 255, 0.72);
-  backdrop-filter: blur(10px);
-  overflow-x: auto;
-}
-
-.budget-table {
-  inline-size: 100%;
-  border-collapse: collapse;
-  min-inline-size: 960px;
-}
-
-.budget-table th,
-.budget-table td {
-  border-bottom: 1px solid rgba(226, 232, 240, 0.7);
-  text-align: start;
-}
-
-.budget-table thead th {
-  font-size: 0.85rem;
-  text-transform: uppercase;
-  letter-spacing: 0.05em;
-  color: var(--rk-color-muted-foreground, #64748b);
-}
-
-.budget-table tbody tr:hover {
-  background: rgba(226, 232, 240, 0.35);
-}
-
-.budget-table__input {
-  inline-size: 100%;
-  border: none;
-  background: transparent;
-  font-size: 0.95rem;
-  color: var(--rk-color-foreground, #0f172a);
-}
-
-.budget-table__input:focus-visible {
-  outline: none;
-  box-shadow: inset 0 0 0 2px rgba(34, 211, 238, 0.45);
-  border-radius: 0.75rem;
-}
-
-.budget-table__input--number {
-  text-align: end;
-}
-
-.budget-table__select {
-  inline-size: 100%;
-  border-radius: 0.75rem;
-  border: 1px solid rgba(148, 163, 184, 0.4);
-  padding: 0.35rem 0.5rem;
-  background: rgba(255, 255, 255, 0.9);
-  font-size: 0.9rem;
-}
-
-.budget-table__select:focus-visible {
-  outline: 2px solid rgba(34, 211, 238, 0.45);
-}
-
-.budget-table__checkbox {
-  text-align: center;
-}
-
-.budget-table__checkbox input {
-  inline-size: 1.1rem;
-  block-size: 1.1rem;
-  cursor: pointer;
-}
-
-.budget-table__pending {
-  font-weight: 600;
-  color: var(--rk-color-foreground, #0f172a);
-}
-
-.budget-table__actions {
-  display: flex;
-  gap: 0.5rem;
-}
-
-.budget-table__action {
-  border: none;
-  border-radius: 999px;
-  padding: 0.4rem 0.8rem;
-  font-size: 0.8rem;
-  cursor: pointer;
-  background: rgba(34, 211, 238, 0.15);
-  color: var(--rk-color-foreground, #0f172a);
-}
-
-.budget-table__action:hover {
-  background: rgba(34, 211, 238, 0.3);
-}
-
-.budget-table__action--danger {
-  background: rgba(239, 68, 68, 0.12);
-  color: #b91c1c;
-}
-
-.budget-table__action--danger:hover {
-  background: rgba(239, 68, 68, 0.25);
-}
-
-.budget-table__unit {
-  inline-size: 8rem;
-}
-
-.budget-table__empty {
-  text-align: center;
-  padding-block: 2rem;
-  color: var(--rk-color-muted-foreground, #64748b);
-}
-</style>
-
