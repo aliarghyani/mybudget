@@ -145,7 +145,7 @@ function removeRow(id: string) {
               <input
                 :data-row-id="row.id"
                 data-focus-index="0"
-                class="w-full bg-transparent text-[0.95rem] text-slate-900 dark:text-slate-100 rounded-lg focus:outline-none focus:ring-2 focus:ring-cyan-300"
+                class="w-full rounded-lg border border-slate-200/60 bg-white/90 px-3 py-2 text-[0.95rem] text-slate-900 placeholder:text-slate-400 shadow-sm transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cyan-400 focus-visible:ring-offset-1 focus-visible:ring-offset-white dark:border-slate-700/60 dark:bg-slate-900/50 dark:text-slate-100 dark:placeholder:text-slate-500 dark:focus-visible:ring-offset-slate-900"
                 type="text"
                 :placeholder="t('placeholders.title')"
                 :value="row.title"
@@ -157,7 +157,7 @@ function removeRow(id: string) {
               <input
                 :data-row-id="row.id"
                 data-focus-index="1"
-                class="w-full bg-transparent text-[0.95rem] text-end text-slate-900 dark:text-slate-100 rounded-lg focus:outline-none focus:ring-2 focus:ring-cyan-300"
+                class="w-full rounded-lg border border-slate-200/60 bg-white/90 px-3 py-2 text-[0.95rem] text-end text-slate-900 placeholder:text-slate-400 shadow-sm transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cyan-400 focus-visible:ring-offset-1 focus-visible:ring-offset-white dark:border-slate-700/60 dark:bg-slate-900/50 dark:text-slate-100 dark:placeholder:text-slate-500 dark:focus-visible:ring-offset-slate-900"
                 type="text"
                 inputmode="decimal"
                 :value="formattedUnitValue(row.plannedIRT, row.inputUnit)"
@@ -170,7 +170,7 @@ function removeRow(id: string) {
                 <SelectTrigger
                   :data-row-id="row.id"
                   data-focus-index="2"
-                  class="w-full rounded-lg border border-slate-300/60 dark:border-slate-700/60 bg-white/90 dark:bg-slate-800 px-2 py-1.5 text-left"
+                  class="w-full rounded-lg border border-slate-200/60 bg-white/90 px-2 py-1.5 text-left text-slate-900 shadow-sm transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cyan-400 focus-visible:ring-offset-1 focus-visible:ring-offset-white dark:border-slate-700/60 dark:bg-slate-900/50 dark:text-slate-100 dark:focus-visible:ring-offset-slate-900"
                   @keydown="onKeyNavigation($event, row.id, 2)"
                 >
                   <SelectValue />
@@ -179,7 +179,11 @@ function removeRow(id: string) {
                   <SelectContent class="z-50 min-w-[8rem] overflow-hidden rounded-xl border border-slate-200/60 dark:border-slate-700/60 bg-white dark:bg-slate-800 shadow-lg">
                     <SelectViewport class="p-1">
                       <SelectItem v-for="unit in unitOptions" :key="unit.value" :value="unit.value" class="group flex items-center gap-2 rounded-lg px-2 py-2 data-[state=checked]:bg-cyan-50 dark:data-[state=checked]:bg-slate-700/40">
-                        <SelectItemIndicator>✓</SelectItemIndicator>
+                        <SelectItemIndicator class="flex h-4 w-4 items-center justify-center text-cyan-600">
+                          <svg class="h-3 w-3" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M3.75 8.25 6.75 11.25 12.25 5.75" />
+                          </svg>
+                        </SelectItemIndicator>
                         <SelectItemText>{{ unit.label }}</SelectItemText>
                       </SelectItem>
                     </SelectViewport>
@@ -190,20 +194,24 @@ function removeRow(id: string) {
             <td :class="cellPad + ' text-center'">
               <CheckboxRoot
                 :model-value="row.must"
-                class="inline-grid place-items-center w-5 h-5 rounded border border-slate-400/60 data-[state=checked]:bg-cyan-500 data-[state=checked]:border-cyan-500"
+                class="inline-flex h-5 w-5 items-center justify-center rounded-md border border-slate-300/70 bg-white text-slate-600 shadow-sm transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cyan-400 focus-visible:ring-offset-2 focus-visible:ring-offset-white data-[state=checked]:border-cyan-500 data-[state=checked]:bg-cyan-500 data-[state=checked]:text-white dark:border-slate-600 dark:bg-slate-800 dark:text-slate-300 dark:focus-visible:ring-offset-slate-900 dark:data-[state=checked]:border-cyan-400"
                 @update:modelValue="(v: any) => updateMust(row.id, v === true)"
                 :data-row-id="row.id"
                 data-focus-index="3"
                 @keydown="onKeyNavigation($event, row.id, 3)"
               >
-                <CheckboxIndicator class="text-white">✓</CheckboxIndicator>
+                <CheckboxIndicator class="pointer-events-none">
+                  <svg class="h-3.5 w-3.5" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M3.75 8.25 6.75 11.25 12.25 5.75" />
+                  </svg>
+                </CheckboxIndicator>
               </CheckboxRoot>
             </td>
             <td :class="cellPad">
               <input
                 :data-row-id="row.id"
                 data-focus-index="4"
-                class="w-full bg-transparent text-[0.95rem] text-slate-900 dark:text-slate-100 rounded-lg focus:outline-none focus:ring-2 focus:ring-cyan-300"
+                class="w-full rounded-lg border border-slate-200/60 bg-white/90 px-3 py-2 text-[0.95rem] text-slate-900 placeholder:text-slate-400 shadow-sm transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cyan-400 focus-visible:ring-offset-1 focus-visible:ring-offset-white dark:border-slate-700/60 dark:bg-slate-900/50 dark:text-slate-100 dark:placeholder:text-slate-500 dark:focus-visible:ring-offset-slate-900"
                 type="text"
                 :placeholder="t('placeholders.comment')"
                 :value="row.comment ?? ''"
@@ -214,20 +222,24 @@ function removeRow(id: string) {
             <td :class="cellPad + ' text-center'">
               <CheckboxRoot
                 :model-value="row.paidFlag"
-                class="inline-grid place-items-center w-5 h-5 rounded border border-slate-400/60 data-[state=checked]:bg-cyan-500 data-[state=checked]:border-cyan-500"
+                class="inline-flex h-5 w-5 items-center justify-center rounded-md border border-slate-300/70 bg-white text-slate-600 shadow-sm transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cyan-400 focus-visible:ring-offset-2 focus-visible:ring-offset-white data-[state=checked]:border-cyan-500 data-[state=checked]:bg-cyan-500 data-[state=checked]:text-white dark:border-slate-600 dark:bg-slate-800 dark:text-slate-300 dark:focus-visible:ring-offset-slate-900 dark:data-[state=checked]:border-cyan-400"
                 @update:modelValue="(v: any) => updatePaidFlag(row.id, v === true)"
                 :data-row-id="row.id"
                 data-focus-index="5"
                 @keydown="onKeyNavigation($event, row.id, 5)"
               >
-                <CheckboxIndicator class="text-white">✓</CheckboxIndicator>
+                <CheckboxIndicator class="pointer-events-none">
+                  <svg class="h-3.5 w-3.5" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M3.75 8.25 6.75 11.25 12.25 5.75" />
+                  </svg>
+                </CheckboxIndicator>
               </CheckboxRoot>
             </td>
             <td :class="cellPad">
               <input
                 :data-row-id="row.id"
                 data-focus-index="6"
-                class="w-full bg-transparent text-[0.95rem] text-end text-slate-900 dark:text-slate-100 rounded-lg focus:outline-none focus:ring-2 focus:ring-cyan-300"
+                class="w-full rounded-lg border border-slate-200/60 bg-white/90 px-3 py-2 text-[0.95rem] text-end text-slate-900 placeholder:text-slate-400 shadow-sm transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cyan-400 focus-visible:ring-offset-1 focus-visible:ring-offset-white dark:border-slate-700/60 dark:bg-slate-900/50 dark:text-slate-100 dark:placeholder:text-slate-500 dark:focus-visible:ring-offset-slate-900"
                 type="text"
                 inputmode="decimal"
                 :value="row.paidIRT !== undefined ? formattedUnitValue(row.paidIRT, row.inputUnit) : ''"
@@ -244,7 +256,7 @@ function removeRow(id: string) {
                 <SelectTrigger
                   :data-row-id="row.id"
                   data-focus-index="7"
-                  class="w-full rounded-lg border border-slate-300/60 dark:border-slate-700/60 bg-white/90 dark:bg-slate-800 px-2 py-1.5 text-left"
+                  class="w-full rounded-lg border border-slate-200/60 bg-white/90 px-2 py-1.5 text-left text-slate-900 shadow-sm transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cyan-400 focus-visible:ring-offset-1 focus-visible:ring-offset-white dark:border-slate-700/60 dark:bg-slate-900/50 dark:text-slate-100 dark:focus-visible:ring-offset-slate-900"
                   @keydown="onKeyNavigation($event, row.id, 7)"
                 >
                   <SelectValue />
@@ -253,7 +265,11 @@ function removeRow(id: string) {
                   <SelectContent class="z-50 min-w-[8rem] overflow-hidden rounded-xl border border-slate-200/60 dark:border-slate-700/60 bg-white dark:bg-slate-800 shadow-lg">
                     <SelectViewport class="p-1">
                       <SelectItem v-for="opt in kindOptions" :key="opt.value" :value="opt.value" class="group flex items-center gap-2 rounded-lg px-2 py-2 data-[state=checked]:bg-cyan-50 dark:data-[state=checked]:bg-slate-700/40">
-                        <SelectItemIndicator>✓</SelectItemIndicator>
+                        <SelectItemIndicator class="flex h-4 w-4 items-center justify-center text-cyan-600">
+                          <svg class="h-3 w-3" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M3.75 8.25 6.75 11.25 12.25 5.75" />
+                          </svg>
+                        </SelectItemIndicator>
                         <SelectItemText>{{ opt.label }}</SelectItemText>
                       </SelectItem>
                     </SelectViewport>

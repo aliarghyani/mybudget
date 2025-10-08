@@ -20,6 +20,8 @@ import {
   SelectItemIndicator
 } from 'reka-ui';
 
+import MonthPicker from '@/components/MonthPicker.vue';
+
 const ledgerStore = useLedgerStore();
 const settingsStore = useSettingsStore();
 const { settings } = storeToRefs(settingsStore);
@@ -52,9 +54,8 @@ function onUsdRateBlur(event: Event) {
   target.value = settings.value.usdToIrt.toString();
 }
 
-function onDefaultMonthChange(event: Event) {
-  const target = event.target as HTMLInputElement;
-  settingsStore.setDefaultMonth(target.value);
+function onDefaultMonthChange(value: string) {
+  settingsStore.setDefaultMonth(value);
 }
 
 function triggerImport() {
@@ -181,11 +182,10 @@ function onResetConfirmed() {
         </label>
         <label class="grid gap-2 text-sm text-slate-500 dark:text-slate-400">
           <span>{{ t('settings.defaultMonth') }}</span>
-          <input
-            type="month"
-            :value="settings.defaultMonth"
-            class="rounded-xl border border-slate-300/60 dark:border-slate-700/60 bg-white/90 dark:bg-slate-800 px-3 py-2 text-slate-900 dark:text-slate-100"
-            @change="onDefaultMonthChange"
+          <MonthPicker
+            class="w-full justify-between"
+            :model-value="settings.defaultMonth"
+            @update:modelValue="onDefaultMonthChange"
           />
         </label>
         <label class="grid gap-2 text-sm text-slate-500 dark:text-slate-400">
@@ -265,4 +265,3 @@ function onResetConfirmed() {
     />
   </form>
 </template>
-
